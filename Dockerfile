@@ -19,6 +19,12 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Habilitar logs de erro do PHP
+RUN echo "error_reporting = E_ALL" >> /usr/local/etc/php/php.ini \
+    && echo "display_errors = On" >> /usr/local/etc/php/php.ini \
+    && echo "log_errors = On" >> /usr/local/etc/php/php.ini \
+    && echo "error_log = /dev/stderr" >> /usr/local/etc/php/php.ini
+    
 EXPOSE 80
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
