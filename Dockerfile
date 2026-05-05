@@ -25,6 +25,9 @@ RUN echo "error_reporting = E_ALL" >> /usr/local/etc/php/php.ini \
     && echo "log_errors = On" >> /usr/local/etc/php/php.ini \
     && echo "error_log = /dev/stderr" >> /usr/local/etc/php/php.ini
 
+
+RUN echo "APP_URL=https://sistemacreio.onrender.com" >> /var/www/.env
+
 EXPOSE 80
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
