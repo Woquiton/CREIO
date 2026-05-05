@@ -16,7 +16,6 @@ RUN composer install --optimize-autoloader --no-dev
 
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Configuração do Nginx
 RUN echo 'server { \n\
     listen 80; \n\
     root /var/www/public; \n\
@@ -26,16 +25,15 @@ RUN echo 'server { \n\
     } \n\
     location ~ \.php$ { \n\
         include fastcgi_params; \n\
-        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock; \n\
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name; \n\
+        fastcgi_pass 127.0.0.1:9000; \n\
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \n\
     } \n\
 }' > /etc/nginx/sites-available/default
 
-# Script de inicialização
-RUN echo '#!/bin/bash\n\
+RUN echo '#!/bin/sh\n\
 php-fpm -D\n\
-sleep 2\n\
-nginx -g "daemon off;"' > /start.sh && chmod +x /start.sh
+sleep 3\n\
+exec nginx -g "daemon off;"' > /start.sh && chmod +x /start.sh
 
 EXPOSE 80
 
