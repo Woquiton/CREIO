@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# Dependências do sistema
+# Dependências do sistema + Nginx
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -8,9 +8,10 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
-    unzip
+    unzip \
+    nginx
 
-# Extensões PHP necessárias para o Laravel
+# Extensões PHP
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Composer
@@ -26,5 +27,23 @@ RUN ln -sf /var/www/storage/app/public /var/www/public/storage
 
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-EXPOSE 9000
-CMD ["php-fpm"]
+# Configuração do Nginx para Laravel
+RUN echo 'server { \
+    listen 80; \
+    root /var/www/public; \
+    index index.php index.html; \
+    location / { \
+        try_files $uri $uri/ /index.php?$query_string; \
+    } \
+    location ~ \.php$ { \
+        fastcgi_pass 127.0.0.1:9000; \
+        fastcgi_index index.php; \
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name; \
+        include fastcgi_params; \
+    } \
+}' > /etc/nginx/sites-available/default
+
+EXPOSE 80
+
+# Sobe PHP-FPM e Nginx juntos
+CMD service nginx start && php-fpm

@@ -109,8 +109,9 @@ class AlunoController extends Controller
         $aluno->deficiencias()->sync($request->deficiencias ?? []);
         $aluno->diagnosticos()->sync($request->diagnosticos ?? []);
 
+        $datasEntrada = $request->data_entrada ?? [];
         $listasSync = collect($request->listasEspera ?? [])->mapWithKeys(fn($id) => [
-            $id => ['data_entrada' => now()->toDateString()],
+            $id => ['data_entrada' => $datasEntrada[$id] ?? now()->toDateString()],
         ])->toArray();
         $aluno->listasEspera()->sync($listasSync);
 
@@ -199,9 +200,10 @@ class AlunoController extends Controller
         $aluno->diagnosticos()->sync($request->diagnosticos ?? []);
 
         $aluno->load('listasEspera');
+        $datasEntrada    = $request->data_entrada ?? [];
         $datasExistentes = $aluno->listasEspera->pluck('pivot.data_entrada', 'id');
         $listasSync = collect($request->listasEspera ?? [])->mapWithKeys(fn($id) => [
-            $id => ['data_entrada' => $datasExistentes->get($id) ?? now()->toDateString()],
+            $id => ['data_entrada' => $datasEntrada[$id] ?? $datasExistentes->get($id) ?? now()->toDateString()],
         ])->toArray();
         $aluno->listasEspera()->sync($listasSync);
 

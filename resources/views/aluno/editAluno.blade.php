@@ -346,17 +346,28 @@
 
         <div class="col-12">
           <label class="form-label">Filas de espera que o aluno está inserido</label>
-          <div class="chips">
-            @forelse($listaEspera as $lista)
-              <label class="chip">
+          @forelse($listaEspera as $lista)
+            @php
+              $pivot   = $aluno->listasEspera->firstWhere('id', $lista->id)?->pivot;
+              $marcado = $pivot !== null;
+            @endphp
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+              <label class="chip" style="margin:0;">
                 <input type="checkbox" name="listasEspera[]" value="{{ $lista->id }}"
-                  {{ $aluno->listasEspera->contains('id', $lista->id) ? 'checked' : '' }}>
+                  {{ $marcado ? 'checked' : '' }}
+                  onchange="toggleDataEntrada({{ $lista->id }}, this.checked)">
                 <span>{{ $lista->nome }}</span>
               </label>
-            @empty
-              <p style="color:#94a3b8; font-size:0.85rem;">Nenhuma lista de espera ativa cadastrada.</p>
-            @endforelse
-          </div>
+              <input type="date" name="data_entrada[{{ $lista->id }}]"
+                id="data_entrada_{{ $lista->id }}"
+                class="form-control soft-input"
+                style="max-width:170px; {{ $marcado ? '' : 'display:none;' }}"
+                value="{{ $marcado ? $pivot->data_entrada : '' }}"
+                {{ $marcado ? '' : 'disabled' }}>
+            </div>
+          @empty
+            <p style="color:#94a3b8; font-size:0.85rem;">Nenhuma lista de espera ativa cadastrada.</p>
+          @endforelse
         </div>
       </div>
 
@@ -540,6 +551,13 @@
 </div>
 
 <script>
+  function toggleDataEntrada(listaId, checked) {
+    const input = document.getElementById('data_entrada_' + listaId);
+    input.style.display = checked ? 'inline-block' : 'none';
+    input.disabled = !checked;
+    if (!checked) input.value = '';
+  }
+
   // ── Campos condicionais (Sim/Não) ─────────────────────────────
   function toggleQual(divId) {
     var radio = document.querySelector('input[onchange*="' + divId + '"]:checked');

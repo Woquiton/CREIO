@@ -331,16 +331,22 @@
 
         <div class="col-12">
           <label class="form-label">Filas de espera que o aluno será inserido</label>
-          <div class="chips">
-            @forelse($listaEspera as $lista)
-              <label class="chip">
-                <input type="checkbox" name="listasEspera[]" value="{{ $lista->id }}">
+          @forelse($listaEspera as $lista)
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+              <label class="chip" style="margin:0;">
+                <input type="checkbox" name="listasEspera[]" value="{{ $lista->id }}"
+                  onchange="toggleDataEntrada({{ $lista->id }}, this.checked)">
                 <span>{{ $lista->nome }}</span>
               </label>
-            @empty
-              <p style="color:#94a3b8; font-size:0.85rem;">Nenhuma lista de espera ativa cadastrada.</p>
-            @endforelse
-          </div>
+              <input type="date" name="data_entrada[{{ $lista->id }}]"
+                id="data_entrada_{{ $lista->id }}"
+                class="form-control soft-input"
+                style="max-width:170px; display:none;"
+                disabled>
+            </div>
+          @empty
+            <p style="color:#94a3b8; font-size:0.85rem;">Nenhuma lista de espera ativa cadastrada.</p>
+          @endforelse
         </div>
       </div>
 
@@ -445,6 +451,13 @@
 </div>
 
 <script>
+  function toggleDataEntrada(listaId, checked) {
+    const input = document.getElementById('data_entrada_' + listaId);
+    input.style.display = checked ? 'inline-block' : 'none';
+    input.disabled = !checked;
+    if (!checked) input.value = '';
+  }
+
   // ── Campos condicionais (Sim/Não) ─────────────────────────────
   function toggleQual(divId) {
     var radio = document.querySelector('input[onchange*="' + divId + '"]:checked');

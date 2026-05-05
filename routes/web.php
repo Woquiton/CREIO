@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/agendamento/profissionais/{alunoId}', [AgendamentoController::class, 'profissionaisPorAluno'])->name('agendamentos.profissionais');
         Route::get('/agendamento/relatorio/{alunoId}', [AgendamentoController::class, 'relatorioAluno'])->name('agendamentos.relatorio');
         Route::get('/agendamento/relatorio-profissional/{profissionalId}', [AgendamentoController::class, 'relatorioProfissional'])->name('agendamentos.relatorio.profissional');
+        Route::get('/agendamento/imprimir', [AgendamentoController::class, 'imprimir'])->name('agendamentos.imprimir');
     });
 
     Route::middleware('permissao:agendamentos.gerenciar')->group(function () {

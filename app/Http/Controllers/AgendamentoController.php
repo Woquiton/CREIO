@@ -20,7 +20,9 @@ class AgendamentoController extends Controller
     {
         $dataSelecionada  = $request->query('data', today()->toDateString());
         $alunoId          = $request->query('aluno_id');
-        $diaSemana        = \Carbon\Carbon::parse($dataSelecionada)->dayOfWeek;
+        $modo             = $request->query('modo', 'dia');
+        $dataCarbon       = \Carbon\Carbon::parse($dataSelecionada);
+        $diaSemana        = $dataCarbon->dayOfWeek;
 
         $profissionalVinculado = auth()->user()->profissional;
         $profissionalId = $profissionalVinculado
@@ -45,19 +47,47 @@ class AgendamentoController extends Controller
 
         $query = Agendamento::with(['aluno', 'listaEspera', 'horarioProfissional.profissional'])
             ->where('status', 'agendado')
-            ->when($alunoId, fn($q) => $q->where('aluno_id', $alunoId))
-            ->whereHas('horarioProfissional', function ($q) use ($diaSemana, $profissionalId) {
-                $q->where('dia_semana', $diaSemana)->where('ativo', true);
-                if ($profissionalId) {
-                    $q->where('profissional_id', $profissionalId);
-                }
-            });
+            ->when($alunoId, fn($q) => $q->where('aluno_id', $alunoId));
 
-        $agendamentos = $query->get()->sortBy('horarioProfissional.hora_inicio');
+        if ($modo === 'dia') {
+            $query->whereHas('horarioProfissional', function ($q) use ($diaSemana, $profissionalId) {
+                $q->where('dia_semana', $diaSemana)->where('ativo', true);
+                if ($profissionalId) $q->where('profissional_id', $profissionalId);
+            });
+        } else {
+            $query->whereHas('horarioProfissional', function ($q) use ($profissionalId) {
+                $q->where('ativo', true);
+                if ($profissionalId) $q->where('profissional_id', $profissionalId);
+            });
+        }
+
+        $agendamentos = $query->get()->sortBy([
+            ['horarioProfissional.dia_semana', 'asc'],
+            ['horarioProfissional.hora_inicio', 'asc'],
+        ]);
+
+        $ocorrenciasMes = [];
+        if ($modo === 'mes') {
+            $inicioMes = $dataCarbon->copy()->startOfMonth();
+            $fimMes    = $dataCarbon->copy()->endOfMonth();
+            for ($dia = 0; $dia <= 6; $dia++) {
+                $count   = 0;
+                $current = $inicioMes->copy();
+                while ($current->lte($fimMes)) {
+                    if ($current->dayOfWeek === $dia) $count++;
+                    $current->addDay();
+                }
+                $ocorrenciasMes[$dia] = $count;
+            }
+        }
 
         $profissionalFixo = $profissionalVinculado !== null;
 
-        return view('atendimento.index', compact('agendamentos', 'profissionais', 'alunos', 'dataSelecionada', 'alunoId', 'profissionalId', 'profissionalFixo'));
+        return view('atendimento.index', compact(
+            'agendamentos', 'profissionais', 'alunos',
+            'dataSelecionada', 'alunoId', 'profissionalId', 'profissionalFixo',
+            'modo', 'ocorrenciasMes'
+        ));
     }
 
     /**
@@ -205,10 +235,13 @@ class AgendamentoController extends Controller
     {
         $agendamento = Agendamento::with('aluno')->findOrFail($id);
 
-        // Devolve o aluno para a fila de espera
+        // Devolve o aluno para o fim da fila de espera
         $agendamento->aluno
             ->listasEspera()
-            ->updateExistingPivot($agendamento->lista_espera_id, ['status' => 'aguardando']);
+            ->updateExistingPivot($agendamento->lista_espera_id, [
+                'status'       => 'aguardando',
+                'data_entrada' => now()->toDateString(),
+            ]);
 
         $agendamento->delete();
         $this->registrarLog('excluiu', 'Agendamento', "Removeu o agendamento do aluno {$agendamento->aluno->nome}");
@@ -241,6 +274,59 @@ class AgendamentoController extends Controller
             ->sortBy('horarioProfissional.dia_semana');
 
         return view('atendimento.relatorioProfissional', compact('profissional', 'agendamentos'));
+    }
+
+    public function imprimir(Request $request)
+    {
+        $modo           = $request->query('modo', 'dia');
+        $dataSelecionada = $request->query('data', today()->toDateString());
+        $profissionalId = $request->query('profissional_id');
+        $dataCarbon     = \Carbon\Carbon::parse($dataSelecionada);
+        $diaSemana      = $dataCarbon->dayOfWeek;
+
+        $profissional = $profissionalId ? Profissional::find($profissionalId) : null;
+
+        $query = Agendamento::with(['aluno', 'horarioProfissional.profissional'])
+            ->where('status', 'agendado');
+
+        if ($profissionalId) {
+            $query->whereHas('horarioProfissional', fn($q) =>
+                $q->where('profissional_id', $profissionalId)->where('ativo', true)
+            );
+        } else {
+            $query->whereHas('horarioProfissional', fn($q) => $q->where('ativo', true));
+        }
+
+        if ($modo === 'dia') {
+            $query->whereHas('horarioProfissional', fn($q) =>
+                $q->where('dia_semana', $diaSemana)
+            );
+        }
+
+        $agendamentos = $query->get()->sortBy([
+            ['horarioProfissional.dia_semana', 'asc'],
+            ['horarioProfissional.hora_inicio', 'asc'],
+        ]);
+
+        $ocorrenciasMes = [];
+        if ($modo === 'mes') {
+            $inicioMes = $dataCarbon->copy()->startOfMonth();
+            $fimMes    = $dataCarbon->copy()->endOfMonth();
+            for ($dia = 0; $dia <= 6; $dia++) {
+                $count   = 0;
+                $current = $inicioMes->copy();
+                while ($current->lte($fimMes)) {
+                    if ($current->dayOfWeek === $dia) $count++;
+                    $current->addDay();
+                }
+                $ocorrenciasMes[$dia] = $count;
+            }
+        }
+
+        return view('atendimento.impressaoAgendamentos', compact(
+            'agendamentos', 'profissional', 'modo',
+            'dataCarbon', 'ocorrenciasMes'
+        ));
     }
 
     public function horarios(Request $request)
