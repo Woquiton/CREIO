@@ -19,6 +19,8 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/start.sh /start.sh
+RUN chmod +x /start.sh
 
 RUN echo "error_reporting = E_ALL" >> /usr/local/etc/php/php.ini \
     && echo "display_errors = On" >> /usr/local/etc/php/php.ini \
@@ -30,4 +32,4 @@ RUN echo "APP_URL=https://sistemacreio.onrender.com" >> /var/www/.env
 
 EXPOSE 80
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/bin/bash", "/start.sh"]
