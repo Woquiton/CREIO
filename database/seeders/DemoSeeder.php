@@ -106,8 +106,6 @@ class DemoSeeder extends Seeder
                 ]);
             }
         }
-        $horarios = DB::table('horarios_profissional')->get();
-
         /*
         |--------------------------------------------------------------------------
         | ALUNOS (100)
@@ -136,64 +134,27 @@ class DemoSeeder extends Seeder
 
         /*
         |--------------------------------------------------------------------------
-        | RELAÇÕES + LISTA DE ESPERA / AGENDAMENTO
+        | RELAÇÕES E LISTA DE ESPERA
         |--------------------------------------------------------------------------
         */
         foreach ($alunoIds as $alunoId) {
 
             DB::table('aluno_deficiencia')->insert([
-                'aluno_id'      => $alunoId,
-                'deficiencia_id'=> $faker->randomElement($deficienciaIds),
+                'aluno_id'       => $alunoId,
+                'deficiencia_id' => $faker->randomElement($deficienciaIds),
             ]);
 
             DB::table('aluno_diagnostico')->insert([
-                'aluno_id'      => $alunoId,
-                'diagnostico_id'=> $faker->randomElement($diagnosticoIds),
+                'aluno_id'       => $alunoId,
+                'diagnostico_id' => $faker->randomElement($diagnosticoIds),
             ]);
 
-            $temAgendamento = $faker->boolean(70);
-
-            if ($temAgendamento) {
-
-                $qtd = rand(2, 5);
-
-                for ($i = 0; $i < $qtd; $i++) {
-
-                    $horario = $horarios->random();
-                    $data    = Carbon::now()->subDays(rand(1, 60));
-
-                    DB::table('agendamentos')->insert([
-                        'aluno_id'                 => $alunoId,
-                        'lista_espera_id'           => $faker->randomElement($listasIds),
-                        'horarios_profissional_id'  => $horario->id,
-                        'data'                     => $data->format('Y-m-d'),
-                        'status'                   => 'agendado',
-                        'created_at'               => now(),
-                        'updated_at'               => now(),
-                    ]);
-
-                    $faltou = $faker->boolean(25);
-
-                    DB::table('registros_atendimento')->insert([
-                        'aluno_id'             => $alunoId,
-                        'profissional_id'      => $horario->profissional_id,
-                        'data_atendimento'     => $data->format('Y-m-d'),
-                        'faltou'               => $faltou,
-                        'motivo_falta'         => $faltou ? 'Não compareceu' : null,
-                        'observacoes'          => $faker->sentence,
-                        'created_at'           => now(),
-                        'updated_at'           => now(),
-                    ]);
-                }
-            } else {
-
-                DB::table('lista_espera_aluno')->insert([
-                    'aluno_id'       => $alunoId,
-                    'lista_espera_id'=> $faker->randomElement($listasIds),
-                    'data_entrada'   => Carbon::now()->subDays(rand(5, 120))->format('Y-m-d'),
-                    'status'         => 'aguardando',
-                ]);
-            }
+            DB::table('lista_espera_aluno')->insert([
+                'aluno_id'        => $alunoId,
+                'lista_espera_id' => $faker->randomElement($listasIds),
+                'data_entrada'    => Carbon::now()->subDays(rand(5, 120))->format('Y-m-d'),
+                'status'          => 'aguardando',
+            ]);
         }
     }
 }
