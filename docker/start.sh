@@ -5,6 +5,5 @@ php /var/www/artisan migrate:fresh --force
 
 php /var/www/artisan db:seed --class=SuperUserSeeder --force
 
-php /var/www/artisan db:seed --class=DemoSeeder --force
 
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
