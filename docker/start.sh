@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-php /var/www/artisan migrate --force
+php /var/www/artisan migrate:fresh --force
 
 php /var/www/artisan db:seed --class=SuperUserSeeder --force
 
