@@ -145,8 +145,17 @@ class AlunoController extends Controller
             $query->where('data_atendimento', '<=', request('data_fim'));
         }
 
-        $atendimentos = $query->get();
-        return view('aluno.showAluno', compact('aluno', 'atendimentos'));
+        if (request()->filled('profissional_id')) {
+            $query->where('profissional_id', request('profissional_id'));
+        }
+
+        $atendimentos = $query->orderBy('data_atendimento', 'desc')->get();
+
+        $profissionaisDoAluno = \App\Models\Profissional::whereIn('id',
+            $aluno->registrosAtendimento()->whereNotNull('profissional_id')->pluck('profissional_id')->unique()
+        )->orderBy('nome')->get();
+
+        return view('aluno.showAluno', compact('aluno', 'atendimentos', 'profissionaisDoAluno'));
     }
 
     /**

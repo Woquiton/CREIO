@@ -45,7 +45,9 @@ O **Sistema CREIO** é uma plataforma de gestão desenvolvida para organizar e f
 - [Docker](https://www.docker.com/) instalado
 - [Git](https://git-scm.com/) instalado
 
-## Como rodar o projeto
+---
+
+## Como rodar o projeto (desenvolvimento)
 
 ### 1. Clone o repositório
 
@@ -56,48 +58,56 @@ cd SistemaCREIO
 
 ### 2. Configure o ambiente
 
-Copie o arquivo de exemplo e ajuste as variáveis:
-
 ```bash
 cp .env.example .env
 ```
 
-Variáveis principais a configurar no `.env`:
+Ajuste as variáveis no `.env`:
 
 ```env
 APP_NAME="Sistema CREIO"
 APP_ENV=local
+APP_KEY=
 APP_URL=http://localhost:8082
 
-DB_DATABASE=seu_banco_de_dados
-DB_USERNAME=seu_nome
-DB_PASSWORD=sua_senha
+DB_DATABASE=nome_do_banco
+DB_USERNAME=usuario
+DB_PASSWORD=senha
 ```
 
-### 3. Suba os containers
+### 3. Gere a chave da aplicação
+
+```bash
+docker compose -f docker-compose.dev.yml run --rm app php artisan key:generate --show
+```
+
+Copie o valor gerado (ex: `base64:xYz...`) e cole em `APP_KEY` no `.env`.
+
+### 4. Suba os containers
 
 ```bash
 docker compose -f docker-compose.dev.yml up -d
 ```
-ou 
+
+### 5. Execute as migrations
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.dev.yml exec creio_app_dev php artisan migrate --seed
 ```
 
-### 4. Execute as migrations
-
-```bash
-docker compose -f docker-compose.dev.yml exec creio_php php artisan migrate --seed
-```
-
-### 5. Acesse o sistema
+### 6. Acesse o sistema
 
 Abra o navegador em: [http://localhost:8082](http://localhost:8082)
 
 ---
 
-## Comandos úteis
+## Como rodar em produção
+
+Consulte o arquivo [DEPLOY.md](DEPLOY.md) com o passo a passo completo para instalação em servidor.
+
+---
+
+## Comandos úteis (desenvolvimento)
 
 ```bash
 # Ver status dos containers
@@ -107,8 +117,8 @@ docker compose -f docker-compose.dev.yml ps
 docker compose -f docker-compose.dev.yml logs -f
 
 # Limpar cache do Laravel
-docker compose -f docker-compose.dev.yml exec creio_php php artisan cache:clear
-docker compose -f docker-compose.dev.yml exec creio_php php artisan config:clear
+docker compose -f docker-compose.dev.yml exec creio_app_dev php artisan cache:clear
+docker compose -f docker-compose.dev.yml exec creio_app_dev php artisan config:clear
 
 # Derrubar os containers
 docker compose -f docker-compose.dev.yml down
@@ -118,8 +128,10 @@ docker compose -f docker-compose.dev.yml down
 
 | Variável | Descrição | Padrão |
 |---|---|---|
+| `APP_KEY` | Chave de criptografia da aplicação (obrigatório) | — |
 | `APP_ENV` | Ambiente da aplicação (`local` ou `production`) | `local` |
 | `APP_URL` | URL base da aplicação | `http://localhost:8082` |
+| `APP_DEBUG` | Exibir erros detalhados (desativar em produção) | `false` |
 | `FORCE_HTTPS` | Forçar HTTPS nas URLs geradas | `false` |
 | `DB_DATABASE` | Nome do banco de dados | — |
 | `DB_USERNAME` | Usuário do banco | — |

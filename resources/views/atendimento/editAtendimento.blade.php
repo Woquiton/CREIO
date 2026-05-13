@@ -115,6 +115,26 @@
         </div>
       </div>
 
+      {{-- ====== Resumo (full) ====== --}}
+      <div class="fat-card fat-card-full">
+        <div class="fat-card-header">
+          <div class="fat-card-icon"><i class="bi bi-pencil-square"></i></div>
+          <span class="fat-card-title">Resumo do atendimento</span>
+        </div>
+        <div class="fat-card-body">
+          <p class="fat-helper">Escreva uma frase curta sobre como foi a sessão. Esse resumo aparece no histórico do aluno.</p>
+          <textarea
+            name="resumo"
+            class="fat-textarea"
+            rows="2"
+            maxlength="300"
+            placeholder="Ex: Sessão produtiva, aluno demonstrou avanço na coordenação e boa disposição durante as atividades."
+            oninput="document.getElementById('resumo-contador').textContent = this.value.length"
+          >{{ $registro->resumo }}</textarea>
+          <small style="color:#6b7280;"><span id="resumo-contador">{{ strlen($registro->resumo ?? '') }}</span>/300 caracteres</small>
+        </div>
+      </div>
+
       {{-- ====== Observações (full) ====== --}}
       <div class="fat-card fat-card-full">
         <div class="fat-card-header">
@@ -122,9 +142,9 @@
           <span class="fat-card-title">Observações do profissional</span>
         </div>
         <div class="fat-card-body">
-          <p class="fat-helper">Registre percepções, evolução do aluno, pontos de atenção, etc.</p>
-          <textarea name="observacoes" class="fat-textarea" rows="4"
-            placeholder="Ex: O aluno demonstrou boa evolução...">{{ $registro->observacoes }}</textarea>
+          <p class="fat-helper">Descreva como foi o atendimento: como o aluno reagiu às atividades, seu comportamento e disposição durante a sessão, avanços observados em relação aos atendimentos anteriores, dificuldades apresentadas e qualquer outro aspecto relevante para o acompanhamento.</p>
+          <textarea name="observacoes" class="fat-textarea" rows="8"
+            placeholder="Ex: O aluno demonstrou boa receptividade às atividades propostas. Apresentou dificuldade em manter o foco por períodos longos, mas respondeu bem às pausas curtas. Houve avanço na coordenação motora fina em relação à sessão anterior...">{{ $registro->observacoes }}</textarea>
         </div>
       </div>
 

@@ -2,8 +2,8 @@ FROM php:8.2-fpm
 
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev \
-    zip unzip nginx supervisor libpq-dev nodejs npm \
-    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd
+    zip unzip nginx supervisor nodejs npm \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -23,12 +23,9 @@ COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 
 RUN echo "error_reporting = E_ALL" >> /usr/local/etc/php/php.ini \
-    && echo "display_errors = On" >> /usr/local/etc/php/php.ini \
+    && echo "display_errors = Off" >> /usr/local/etc/php/php.ini \
     && echo "log_errors = On" >> /usr/local/etc/php/php.ini \
     && echo "error_log = /dev/stderr" >> /usr/local/etc/php/php.ini
-
-
-RUN echo "APP_URL=https://sistemacreio.onrender.com" >> /var/www/.env
 
 EXPOSE 80
 

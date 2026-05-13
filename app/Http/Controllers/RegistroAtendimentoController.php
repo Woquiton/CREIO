@@ -51,6 +51,7 @@ class RegistroAtendimentoController extends Controller
             'atividades_planejadas' => 'nullable|string',
             'faltou'                => 'required|boolean',
             'motivo_falta'          => 'nullable|string|required_if:faltou,1',
+            'resumo'                => 'nullable|string|max:300',
             'observacoes'           => 'nullable|string',
             'fichas.*'              => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ], [
@@ -65,6 +66,7 @@ class RegistroAtendimentoController extends Controller
             'atividades_planejadas' => $request->atividades_planejadas,
             'faltou'                => $request->boolean('faltou'),
             'motivo_falta'          => $request->boolean('faltou') ? $request->motivo_falta : null,
+            'resumo'                => $request->resumo,
             'observacoes'           => $request->observacoes,
         ]);
 
@@ -105,6 +107,7 @@ class RegistroAtendimentoController extends Controller
             'atividades_planejadas' => 'nullable|string',
             'faltou'                => 'required|boolean',
             'motivo_falta'          => 'nullable|string|required_if:faltou,1',
+            'resumo'                => 'nullable|string|max:300',
             'observacoes'           => 'nullable|string',
             'fichas.*'              => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ], [
@@ -118,6 +121,7 @@ class RegistroAtendimentoController extends Controller
             'atividades_planejadas' => $request->atividades_planejadas,
             'faltou'                => $request->boolean('faltou'),
             'motivo_falta'          => $request->boolean('faltou') ? $request->motivo_falta : null,
+            'resumo'                => $request->resumo,
             'observacoes'           => $request->observacoes,
         ]);
 

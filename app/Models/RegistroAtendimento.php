@@ -15,6 +15,7 @@ class RegistroAtendimento extends Model
         'atividades_planejadas',
         'faltou',
         'motivo_falta',
+        'resumo',
         'observacoes',
     ];
 
