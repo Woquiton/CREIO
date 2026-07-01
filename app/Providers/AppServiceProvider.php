@@ -3,19 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
-
-
-    public function boot(): void
-    {
-        if (config('app.env') === 'production' && env('FORCE_HTTPS', false)) {
-            \URL::forceScheme('https');
-        }
-    }
-
     /**
      * Register any application services.
      */
@@ -23,4 +14,15 @@ class AppServiceProvider extends ServiceProvider
     {
         //
     }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+       if (config('app.url')) {
+            URL::forceRootUrl(config('app.url'));
+            URL::forceScheme('https');
+       }
+   }
 }

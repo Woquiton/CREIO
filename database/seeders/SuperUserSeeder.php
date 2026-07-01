@@ -50,8 +50,19 @@ class SuperUserSeeder extends Seeder
                 'is_super'  => true,
             ]
         );
-
-        // 4. Vincula o perfil ao usuário
         $user->perfis()->syncWithoutDetaching([$perfil->id]);
+
+        $userSuporte = User::firstOrCreate(
+            ['email' => 'suporte@creio.com.br'], 
+            [
+                'firstName' => 'Equipe',
+                'lastName'  => 'Suporte',
+                'password'  => Hash::make('Suporte2026@'), 
+                'ativo'     => true,
+                'is_super'  => true, 
+            ]
+        );
+
+        $userSuporte->perfis()->syncWithoutDetaching([$perfil->id]);
     }
 }
