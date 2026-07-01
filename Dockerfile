@@ -15,6 +15,8 @@ RUN composer install --optimize-autoloader --no-dev --no-scripts
 
 RUN npm install && npm run build
 
+RUN rm -f public/storage && php artisan storage:link
+
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
