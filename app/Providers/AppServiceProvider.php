@@ -22,7 +22,10 @@ class AppServiceProvider extends ServiceProvider
     {
        if (config('app.url')) {
             URL::forceRootUrl(config('app.url'));
-            URL::forceScheme('https');
+
+            if (filter_var(env('FORCE_HTTPS', false), FILTER_VALIDATE_BOOLEAN)) {
+                URL::forceScheme('https');
+            }
        }
    }
 }
